@@ -1,11 +1,13 @@
 # Parliament Scraper
 
-A Laravel-based web scraper for extracting parliament member and committee information from parliament.bg.
+A Laravel-based web scraper for extracting parliament member, committee, and bill information from parliament.bg.
 
 ## Features
 
 - 🏛️ **Parliament Members Scraping**: Extract detailed information about all parliament members
 - 🏢 **Committee Management**: Scrape committee data with member relationships
+- 📄 **Bills Tracking**: Scrape and monitor legislative bills by committee
+- 🔔 **Scheduled Monitoring**: Automated checking for new bills with notifications
 - 📊 **CSV Export**: Export data to CSV format with UTF-8 encoding for Bulgarian text
 - 📁 **Individual Committee Files**: Generate separate files for each committee
 - 🔤 **Bulgarian Text Support**: Proper handling and transliteration of Bulgarian characters
@@ -64,6 +66,36 @@ This command:
 - Links committee members to parliament members
 - Stores committee details and member positions
 
+### Scraping Bills
+
+Scrape legislative bills for committees:
+
+```bash
+# Scrape bills for transport committee (default)
+php artisan bills:scrape
+
+# Scrape bills for specific committee
+php artisan bills:scrape --committee-id=3595
+
+# Scrape bills for all committees
+php artisan bills:scrape --all-committees
+```
+
+### Scheduled Bill Monitoring
+
+Check for new bills automatically:
+
+```bash
+# Check for new bills in last 7 days
+php artisan bills:check-new
+
+# Check for new bills in last 30 days
+php artisan bills:check-new --days=30
+
+# Check specific committee with notifications
+php artisan bills:check-new --committee-id=3613 --notify
+```
+
 ### Exporting Data
 
 #### Export Parliament Members to CSV
@@ -76,6 +108,19 @@ php artisan parliament:export-csv
 
 ```bash
 php artisan committees:export-csv
+```
+
+#### Export Bills to CSV
+
+```bash
+# Export all bills
+php artisan bills:export-csv
+
+# Export recent bills
+php artisan bills:export-csv --days=30
+
+# Export bills for specific committee
+php artisan bills:export-csv --committee-id=3613
 ```
 
 #### Export Individual Committee Files
@@ -118,6 +163,15 @@ php artisan committees:export-files --folder=my_committees
 - **position**: Member position in committee (председател, зам.-председател, член)
 - **date_from/date_to**: Membership period
 
+### Bills
+
+- **bill_id**: Unique bill ID (L_Act_id)
+- **title**: Bill title in Bulgarian
+- **sign**: Official bill number (e.g., 51-554-01-114)
+- **bill_date**: Date the bill was submitted
+- **path**: Bill category path
+- **committee_id**: Committee handling the bill
+
 ## File Exports
 
 ### CSV Files
@@ -140,6 +194,7 @@ php artisan committees:export-files --folder=my_committees
 - **Member Profiles**: `https://www.parliament.bg/api/v1/mp-profile/bg/{member_id}`
 - **Committees**: `https://www.parliament.bg/api/v1/coll-list/bg/3`
 - **Committee Members**: `https://www.parliament.bg/api/v1/coll-list-mp/bg/{committee_id}/3?date=`
+- **Bills by Committee**: `https://www.parliament.bg/api/v1/com-acts/bg/{committee_id}/1`
 
 ## Technical Features
 
@@ -150,6 +205,7 @@ php artisan committees:export-files --folder=my_committees
 
 ### Database Relationships
 - Many-to-many relationship between parliament members and committees
+- One-to-many relationship between committees and bills
 - Pivot table storing member positions and date ranges
 - Eloquent ORM for clean data access
 
@@ -164,8 +220,11 @@ php artisan committees:export-files --folder=my_committees
 |---------|-------------|
 | `parliament:scrape` | Scrape all parliament members |
 | `committees:scrape` | Scrape all committees and relationships |
+| `bills:scrape` | Scrape bills for committees |
+| `bills:check-new` | Check for new bills (scheduled monitoring) |
 | `parliament:export-csv` | Export members to CSV |
 | `committees:export-csv` | Export committees to CSV |
+| `bills:export-csv` | Export bills to CSV |
 | `committees:export-files` | Generate individual committee files |
 
 ## Requirements
