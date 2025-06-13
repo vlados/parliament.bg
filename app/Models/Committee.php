@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Committee extends Model
 {
@@ -45,5 +46,13 @@ class Committee extends Model
     {
         return $this->parliamentMembers()
                     ->wherePivot('date_to', '>', now());
+    }
+
+    /**
+     * Get bills handled by this committee
+     */
+    public function bills(): HasMany
+    {
+        return $this->hasMany(Bill::class, 'committee_id', 'committee_id');
     }
 }
