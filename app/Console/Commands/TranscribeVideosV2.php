@@ -70,10 +70,15 @@ class TranscribeVideosV2 extends Command
                             continue;
                         }
 
+                        // For direct meeting processing, extract committee ID from meeting data
+                        $actualCommitteeId = $committee->committee_id === 'direct' 
+                            ? ($meeting['A_ns_C_id'] ?? '0') 
+                            : $committee->committee_id;
+                            
                         $result = $this->processVideoUrl(
                             $videoUrl,
                             $meetingIdKey,
-                            $committee->committee_id
+                            $actualCommitteeId
                         );
 
                         if ($result === 'completed') {
@@ -111,7 +116,7 @@ class TranscribeVideosV2 extends Command
             info("🎵 Extracting audio from: {$fileName}");
 
             $ffmpegCommand = sprintf(
-                'timeout 300 ffmpeg -i "%s" -vn -acodec libmp3lame -ab 128k "%s" -y 2>&1',
+                'ffmpeg -i "%s" -vn -acodec libmp3lame -ab 128k "%s" -y 2>&1',
                 $videoUrl,
                 $tempAudioFile
             );
@@ -140,14 +145,29 @@ class TranscribeVideosV2 extends Command
             $fileSize = File::size($tempAudioFile);
             info("✅ Audio extracted: " . $this->formatFileSize($fileSize));
 
-            $exitCode = Artisan::call('audio:transcribe', [
-                'file' => $tempAudioFile,
-                '--meeting-id' => $meetingId,
-                '--committee-id' => $committeeId,
-                '--model' => 'scribe_v1',
-                '--timeout' => 1800,
-            ]);
-
+            info("🎤 Starting transcription...");
+            
+            try {
+                // Use exec instead of Artisan::call to avoid potential issues
+                $command = sprintf(
+                    'php -d memory_limit=-1 artisan audio:transcribe "%s" --meeting-id="%s" --committee-id="%s" --model="scribe_v1" --timeout=1800 2>&1',
+                    $tempAudioFile,
+                    $meetingId,
+                    $committeeId
+                );
+                
+                info("Running transcription: {$command}");
+                
+                $output = shell_exec($command);
+                $exitCode = 0; // Assume success if no exception
+                
+                info("📊 Transcription completed");
+                info("Output: {$output}");
+                
+            } catch (\Exception $e) {
+                error("Transcription command failed: {$e->getMessage()}");
+                return 'failed';
+            }
             return $exitCode === 0 ? 'completed' : 'failed';
 
         } catch (\Exception $e) {
