@@ -1,0 +1,30 @@
+{%- assign social = site.minima.social_links -%}
+
+<ul class="social-media-list">
+  {%- if site.github_username -%}
+  <li>
+    <a href="https://github.com/{{ site.github_username }}">
+      <svg class="svg-icon"><use xlink:href="{{ '/assets/minima-social-icons.svg#github' | relative_url }}"></use></svg>
+      <span class="username">{{ site.github_username }}</span>
+    </a>
+  </li>
+  {%- endif -%}
+
+  {%- if site.twitter_username -%}
+  <li>
+    <a href="https://www.twitter.com/{{ site.twitter_username }}">
+      <svg class="svg-icon"><use xlink:href="{{ '/assets/minima-social-icons.svg#twitter' | relative_url }}"></use></svg>
+      <span class="username">{{ site.twitter_username }}</span>
+    </a>
+  </li>
+  {%- endif -%}
+
+  {%- if site.rss -%}
+  <li>
+    <a href="{{ 'feed.xml' | relative_url }}">
+      <svg class="svg-icon"><use xlink:href="{{ '/assets/minima-social-icons.svg#rss' | relative_url }}"></use></svg>
+      <span>RSS</span>
+    </a>
+  </li>
+  {%- endif -%}
+</ul>
