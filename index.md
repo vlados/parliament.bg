@@ -80,10 +80,10 @@ php artisan videos:transcribe-v2 --committee=3613 --since=2025-01-01
 
 ## 📖 Documentation
 
-- [Features Overview](features.html) - Detailed feature descriptions
-- [Installation Guide](installation.html) - Complete setup instructions  
-- [Usage Examples](usage.html) - Command examples and workflows
-- [API Reference](api-reference.html) - Parliament.bg API documentation
+- [Features Overview]({{ "/features/" | relative_url }}) - Detailed feature descriptions
+- [Installation Guide]({{ "/installation/" | relative_url }}) - Complete setup instructions  
+- [Usage Examples]({{ "/usage/" | relative_url }}) - Command examples and workflows
+- [API Reference]({{ "/api-reference/" | relative_url }}) - Parliament.bg API documentation
 
 ## 🎯 Use Cases
 

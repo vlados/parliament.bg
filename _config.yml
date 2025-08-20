@@ -3,8 +3,8 @@ title: Parliament Scraper
 description: >-
   A comprehensive Laravel-based web scraper for extracting parliament member, 
   committee, and bill information from parliament.bg with AI-powered analysis capabilities.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site
+baseurl: "/parliament.bg" # the subpath of your site, e.g. /blog
+url: "https://vlados.github.io" # the base hostname & protocol for your site
 
 # Build settings
 markdown: kramdown
@@ -13,6 +13,10 @@ plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
+
+# Jekyll Feed settings
+feed:
+  path: feed.xml
 
 # Navigation
 header_pages:

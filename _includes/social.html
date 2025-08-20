@@ -21,8 +21,8 @@
 
   {%- if site.rss -%}
   <li>
-    <a href="{{ 'feed.xml' | relative_url }}">
-      <svg class="svg-icon"><use xlink:href="{{ '/assets/minima-social-icons.svg#rss' | relative_url }}"></use></svg>
+    <a href="{{ site.baseurl }}/feed.xml">
+      <svg class="svg-icon"><use xlink:href="{{ site.baseurl }}/assets/minima-social-icons.svg#rss"></use></svg>
       <span>RSS</span>
     </a>
   </li>
