@@ -1,0 +1,63 @@
+# Site settings
+title: Parliament Scraper
+description: >-
+  A comprehensive Laravel-based web scraper for extracting parliament member, 
+  committee, and bill information from parliament.bg with AI-powered analysis capabilities.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site
+
+# Build settings
+markdown: kramdown
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Navigation
+header_pages:
+  - index.md
+  - features.md
+  - installation.md
+  - usage.md
+  - api-reference.md
+  - examples.md
+
+# Social links
+github_username: vlado
+
+# Additional settings
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Exclude from processing
+exclude:
+  - vendor/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - .env
+  - .env.example
+  - composer.json
+  - composer.lock
+  - package.json
+  - package-lock.json
+  - artisan
+  - app/
+  - bootstrap/
+  - config/
+  - database/
+  - public/
+  - resources/
+  - routes/
+  - storage/
+  - tests/
+  - .gitignore
+  - .editorconfig
+  - .styleci.yml
+  - phpunit.xml
+  - server.php
+  - webpack.mix.js
+  - vite.config.js
