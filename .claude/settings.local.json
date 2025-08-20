@@ -20,7 +20,10 @@
       "Bash(venv/bin/python python_scripts/extract_protocol_changes.py:*)",
       "mcp__laravel-boost__list-available-config-keys",
       "mcp__laravel-boost__database-schema",
-      "Bash(ffmpeg:*)"
+      "Bash(ffmpeg:*)",
+      "mcp__laravel-boost__tinker",
+      "mcp__laravel-boost__database-query",
+      "Bash(php:*)"
     ],
     "deny": []
   },

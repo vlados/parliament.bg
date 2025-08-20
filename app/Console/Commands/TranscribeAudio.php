@@ -43,7 +43,7 @@ class TranscribeAudio extends Command
 
         $transcriptionRecord = null;
         
-        if ($meetingId && $committeeId) {
+        if ($meetingId && $committeeId !== null) {
             $transcriptionRecord = VideoTranscription::updateOrCreate([
                 'meeting_id' => $meetingId,
                 'video_filename' => $fileName,
@@ -59,14 +59,15 @@ class TranscribeAudio extends Command
 
         try {
             $response = Http::timeout($timeout)
+                ->withHeaders([
+                    'xi-api-key' => config('services.elevenlabs.api_key'),
+                ])
                 ->attach('file', fopen($filePath, 'r'), $fileName)
                 ->post('https://api.elevenlabs.io/v1/speech-to-text', [
                     'model_id' => $model,
                     'language_code' => 'bg',
                     'word_timestamps' => true,
                     'speaker_diarization' => true,
-                ], [
-                    'xi-api-key' => config('services.elevenlabs.api_key'),
                 ]);
 
             if (!$response->successful()) {

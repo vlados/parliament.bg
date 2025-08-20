@@ -205,43 +205,75 @@ class TranscribeVideosV2 extends Command
         $meetingId = $this->option('meeting');
 
         if ($meetingId) {
-            return $this->fetchMeetingData($meetingId);
+            $meetingData = $this->fetchMeetingData($meetingId);
+            return $meetingData ? [$meetingData] : [];
         }
 
         $since = $this->option('since');
         $limit = (int) $this->option('limit');
+        $allMeetings = [];
+
+        // Get meetings from multiple months/years
+        $startDate = $since ? new \DateTime($since) : new \DateTime('2021-01-01');
+        $endDate = new \DateTime();
+        
+        $currentDate = clone $startDate;
+        $currentDate->modify('first day of this month');
 
         try {
-            $year = date('Y');
-            $month = date('n');
-            $url = "https://www.parliament.bg/api/v1/archive-period/bg/A_Cm_Sit/{$year}/{$month}/{$committee->committee_id}/0";
-            $response = Http::timeout(60)->get($url);
+            while ($currentDate <= $endDate && count($allMeetings) < $limit) {
+                $year = $currentDate->format('Y');
+                $month = $currentDate->format('n');
+                
+                info("Checking meetings for {$committee->committee_id} in {$year}/{$month}");
+                
+                $url = "https://www.parliament.bg/api/v1/archive-period/bg/A_Cm_Sit/{$year}/{$month}/{$committee->committee_id}/0";
+                $response = Http::timeout(60)->get($url);
 
-            if (!$response->successful()) {
-                warning("Failed to fetch meetings for committee {$committee->committee_id}");
-                return [];
-            }
-
-            $data = $response->json() ?? [];
-            if (!is_array($data)) {
-                return [];
-            }
-
-            $meetings = [];
-            foreach ($data as $meeting) {
-                if (isset($meeting['t_id'])) {
-                    $meetingData = $this->fetchMeetingData($meeting['t_id']);
-                    if ($meetingData) {
-                        $meetings[] = $meetingData;
+                if ($response->successful()) {
+                    $data = $response->json() ?? [];
+                    if (is_array($data)) {
+                        foreach ($data as $meeting) {
+                            if (isset($meeting['t_id']) && count($allMeetings) < $limit) {
+                                $meetingData = $this->fetchMeetingData($meeting['t_id']);
+                                if ($meetingData && $this->shouldIncludeMeeting($meetingData, $since)) {
+                                    $allMeetings[] = $meetingData;
+                                }
+                            }
+                        }
                     }
+                } else {
+                    warning("Failed to fetch meetings for committee {$committee->committee_id} in {$year}/{$month}");
                 }
+
+                $currentDate->modify('+1 month');
             }
-            
-            return array_slice($meetings, 0, $limit);
+
+            return $allMeetings;
 
         } catch (\Exception $e) {
             warning("Error fetching meetings: {$e->getMessage()}");
             return [];
+        }
+    }
+
+    private function shouldIncludeMeeting(array $meetingData, ?string $since): bool
+    {
+        if (!$since) {
+            return true;
+        }
+
+        $meetingDate = $meetingData['A_Cm_Sit_date'] ?? null;
+        if (!$meetingDate) {
+            return true; // Include if we can't determine date
+        }
+
+        try {
+            $sinceDateTime = new \DateTime($since);
+            $meetingDateTime = new \DateTime($meetingDate);
+            return $meetingDateTime >= $sinceDateTime;
+        } catch (\Exception $e) {
+            return true; // Include if date parsing fails
         }
     }
 
@@ -256,7 +288,7 @@ class TranscribeVideosV2 extends Command
             }
 
             $data = $response->json();
-            return $data ? [$data] : [];
+            return $data ? $data : [];
 
         } catch (\Exception $e) {
             error("Error fetching meeting {$meetingId}: {$e->getMessage()}");
