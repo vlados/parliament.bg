@@ -34,5 +34,23 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    "openai" => [
+        "api_key" => env("OPENAI_API_KEY"),
+    ],
+    "anthropic" => [
+        "api_key" => env("ANTHROPIC_API_KEY"),
+    ],
+
+    'google' => [
+        'gemini_api_key' => env('GEMINI_API_KEY'),
+    ],
+
+    'python' => [
+        'path' => env('PYTHON_PATH', 'python3'),
+    ],
+
+    'elevenlabs' => [
+        'api_key' => env('ELEVENLABS_API_KEY'),
+    ],
 
 ];
