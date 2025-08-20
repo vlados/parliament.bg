@@ -59,7 +59,7 @@ class TranscribeAudio extends Command
 
         try {
             $response = Http::timeout($timeout)
-                ->attach('file', File::get($filePath), $fileName)
+                ->attach('file', fopen($filePath, 'r'), $fileName)
                 ->post('https://api.elevenlabs.io/v1/speech-to-text', [
                     'model_id' => $model,
                     'language_code' => 'bg',

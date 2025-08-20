@@ -111,32 +111,18 @@ class TranscribeVideosV2 extends Command
             info("🎵 Extracting audio from: {$fileName}");
 
             $ffmpegCommand = sprintf(
-                'ffmpeg -i "%s" -vn -acodec libmp3lame -ab 128k "%s" -y -loglevel error',
+                'timeout 300 ffmpeg -i "%s" -vn -acodec libmp3lame -ab 128k "%s" -y 2>&1',
                 $videoUrl,
                 $tempAudioFile
             );
+            
+            info("Running: {$ffmpegCommand}");
 
-            $process = proc_open($ffmpegCommand, [
-                0 => ["pipe", "r"],
-                1 => ["pipe", "w"],
-                2 => ["pipe", "w"]
-            ], $pipes);
+            $output = shell_exec($ffmpegCommand);
 
-            if (!is_resource($process)) {
-                error("Failed to start ffmpeg process");
-                return 'failed';
-            }
-
-            fclose($pipes[0]);
-            $output = stream_get_contents($pipes[1]);
-            $error = stream_get_contents($pipes[2]);
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-
-            $returnCode = proc_close($process);
-
-            if ($returnCode !== 0) {
-                error("ffmpeg failed: {$error}");
+            // Check if the file was created successfully
+            if (!File::exists($tempAudioFile)) {
+                error("ffmpeg failed to create audio file. Output: {$output}");
                 if (File::exists($tempAudioFile)) {
                     File::delete($tempAudioFile);
                 }
