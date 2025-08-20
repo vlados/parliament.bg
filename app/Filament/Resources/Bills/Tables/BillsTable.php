@@ -18,16 +18,13 @@ class BillsTable
     {
         return $table
             ->columns([
-                TextColumn::make('bill_id')
-                    ->label('ID')
-                    ->searchable()
-                    ->sortable(),
-                
                 TextColumn::make('sign')
                     ->label('Номер')
                     ->searchable()
                     ->sortable()
-                    ->copyable(),
+                    ->copyable()
+                    ->badge()
+                    ->color('primary'),
                 
                 TextColumn::make('title')
                     ->label('Заглавие')
@@ -36,13 +33,17 @@ class BillsTable
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
                         return strlen($state) > 80 ? $state : null;
-                    }),
+                    })
+                    ->weight('bold')
+                    ->size('base'),
                 
                 TextColumn::make('committee.name')
                     ->label('Комисия')
                     ->searchable()
                     ->sortable()
-                    ->wrap(),
+                    ->wrap()
+                    ->badge()
+                    ->color('info'),
                 
                 TextColumn::make('bill_date')
                     ->label('Дата')
@@ -52,6 +53,14 @@ class BillsTable
                 TextColumn::make('path')
                     ->label('Категория')
                     ->searchable()
+                    ->badge()
+                    ->color('gray')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('bill_id')
+                    ->label('ID')
+                    ->searchable()
+                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('created_at')
@@ -84,10 +93,11 @@ class BillsTable
                             ->toArray();
                     }),
             ])
-            ->recordActions([
+            ->actions([
                 ViewAction::make()
-                    ->label('Преглед')
-                    ->modalHeading('Детайли за законопроект'),
+                    ->label('Детайли')
+                    ->icon('heroicon-m-eye')
+                    ->url(fn ($record) => route('filament.backoffice.resources.bills.view', $record)),
             ])
             ->toolbarActions([])
             ->defaultSort('bill_date', 'desc');

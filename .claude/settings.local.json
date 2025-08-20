@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(php artisan make:command:*)",
@@ -9,8 +10,22 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(git commit:*)",
-      "mcp__fetch__fetch"
+      "mcp__fetch__fetch",
+      "mcp__brave__brave_web_search",
+      "mcp__thinking__sequentialthinking",
+      "WebFetch(domain:www.parliament.bg)",
+      "Bash(mkdir:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(venv/bin/python python_scripts/extract_protocol_changes.py:*)",
+      "mcp__laravel-boost__list-available-config-keys",
+      "mcp__laravel-boost__database-schema",
+      "Bash(ffmpeg:*)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "laravel-boost",
+    "herd"
+  ]
 }

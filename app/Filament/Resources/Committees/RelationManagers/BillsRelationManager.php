@@ -30,20 +30,20 @@ class BillsRelationManager extends RelationManager
                 TextInput::make('bill_id')
                     ->label('ID на законопроект')
                     ->disabled(),
-                
+
                 TextInput::make('sign')
                     ->label('Номер')
                     ->disabled(),
-                
+
                 Textarea::make('title')
                     ->label('Заглавие')
                     ->disabled()
                     ->rows(3),
-                
+
                 DateTimePicker::make('bill_date')
                     ->label('Дата')
                     ->disabled(),
-                
+
                 TextInput::make('path')
                     ->label('Категория')
                     ->disabled(),
@@ -58,12 +58,12 @@ class BillsRelationManager extends RelationManager
                 TextColumn::make('bill_id')
                     ->label('ID')
                     ->sortable(),
-                
+
                 TextColumn::make('sign')
                     ->label('Номер')
                     ->searchable()
                     ->copyable(),
-                
+
                 TextColumn::make('title')
                     ->label('Заглавие')
                     ->searchable()
@@ -72,12 +72,12 @@ class BillsRelationManager extends RelationManager
                         $state = $column->getState();
                         return strlen($state) > 60 ? $state : null;
                     }),
-                
+
                 TextColumn::make('bill_date')
                     ->label('Дата')
                     ->date()
                     ->sortable(),
-                
+
                 TextColumn::make('path')
                     ->label('Категория')
                     ->toggleable(isToggledHiddenByDefault: true),

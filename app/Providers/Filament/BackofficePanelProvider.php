@@ -34,8 +34,15 @@ class BackofficePanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             ->simplePageMaxContentWidth(Width::Small)
             ->subNavigationPosition(SubNavigationPosition::End)
+            ->viteTheme('resources/css/filament/backoffice/theme.css')
+            ->topNavigation()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue,
+                'success' => Color::Green,
+                'warning' => Color::Orange,
+                'danger' => Color::Red,
+                'info' => Color::Cyan,
+                'gray' => Color::Gray,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -44,6 +51,8 @@ class BackofficePanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                \App\Filament\Widgets\ParliamentOverviewWidget::class,
+                \App\Filament\Widgets\RecentActivityWidget::class,
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])

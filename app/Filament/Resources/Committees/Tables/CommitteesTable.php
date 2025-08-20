@@ -17,30 +17,43 @@ class CommitteesTable
     {
         return $table
             ->columns([
-                TextColumn::make('committee_id')
-                    ->label('ID')
-                    ->searchable()
-                    ->sortable(),
-                
                 TextColumn::make('name')
                     ->label('Име на комисия')
                     ->searchable()
                     ->sortable()
-                    ->wrap(),
+                    ->wrap()
+                    ->weight('bold')
+                    ->size('base'),
                 
                 TextColumn::make('active_count')
                     ->label('Активни членове')
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color('success'),
                 
                 TextColumn::make('parliament_members_count')
                     ->label('Общо членове')
                     ->counts('parliamentMembers')
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color('info'),
                 
                 TextColumn::make('bills_count')
                     ->label('Законопроекти')
                     ->counts('bills')
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color('warning'),
+                
+                TextColumn::make('status')
+                    ->label('Статус')
+                    ->getStateUsing(fn ($record) => 
+                        $record->date_to === null || $record->date_to > now() 
+                            ? 'Активна' 
+                            : 'Неактивна'
+                    )
+                    ->badge()
+                    ->color(fn ($state) => $state === 'Активна' ? 'success' : 'gray'),
                 
                 TextColumn::make('email')
                     ->label('Имейл')
@@ -51,6 +64,12 @@ class CommitteesTable
                 TextColumn::make('phone')
                     ->label('Телефон')
                     ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('committee_id')
+                    ->label('ID')
+                    ->searchable()
+                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('date_from')
@@ -74,10 +93,11 @@ class CommitteesTable
                     ->label('С законопроекти')
                     ->query(fn (Builder $query): Builder => $query->has('bills')),
             ])
-            ->recordActions([
+            ->actions([
                 ViewAction::make()
-                    ->label('Преглед')
-                    ->modalHeading('Детайли за комисия'),
+                    ->label('Детайли')
+                    ->icon('heroicon-m-eye')
+                    ->url(fn ($record) => route('filament.backoffice.resources.committees.view', $record)),
             ])
             ->toolbarActions([])
             ->defaultSort('name');

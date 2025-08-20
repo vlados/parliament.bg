@@ -1,0 +1,201 @@
+<?php
+
+namespace App\Filament\Resources\Transcripts\RelationManagers;
+
+use App\Models\BillAnalysis;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\CreateAction;
+
+class BillAnalysesRelationManager extends RelationManager
+{
+    protected static string $relationship = 'billAnalyses';
+
+    protected static ?string $title = 'Анализи на законопроекти';
+
+    protected static ?string $modelLabel = 'Анализ';
+
+    protected static ?string $pluralModelLabel = 'Анализи';
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('bill_identifier')
+                    ->label('Идентификатор на законопроект')
+                    ->maxLength(255),
+                    
+                Forms\Components\Select::make('bill_id')
+                    ->label('Законопроект')
+                    ->relationship('bill', 'title')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => 
+                        "{$record->sign} - {$record->title}"
+                    )
+                    ->searchable()
+                    ->nullable(),
+
+                Forms\Components\TextInput::make('proposer_name')
+                    ->label('Предложил')
+                    ->maxLength(255),
+
+                Forms\Components\Select::make('amendment_type')
+                    ->label('Тип изменение')
+                    ->options([
+                        'new' => 'Нов текст',
+                        'modification' => 'Изменение',
+                        'deletion' => 'Заличаване',
+                    ])
+                    ->nullable(),
+
+                Forms\Components\Select::make('status')
+                    ->label('Статус')
+                    ->options([
+                        'proposed' => 'Предложено',
+                        'approved' => 'Одобрено',
+                        'rejected' => 'Отхвърлено',
+                        'pending' => 'В очакване',
+                    ])
+                    ->default('pending')
+                    ->required(),
+
+                Forms\Components\Textarea::make('amendment_description')
+                    ->label('Описание на изменението')
+                    ->rows(3)
+                    ->columnSpanFull(),
+
+                Forms\Components\TextInput::make('ai_confidence')
+                    ->label('Увереност на AI (%)')
+                    ->numeric()
+                    ->step(0.1)
+                    ->minValue(0)
+                    ->maxValue(1)
+                    ->suffix('%')
+                    ->formatStateUsing(fn ($state) => $state ? ($state * 100) : null)
+                    ->dehydrateStateUsing(fn ($state) => $state ? ($state / 100) : null),
+            ]);
+    }
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('bill_identifier')
+            ->columns([
+                TextColumn::make('bill_identifier')
+                    ->label('Законопроект')
+                    ->searchable()
+                    ->copyable()
+                    ->placeholder('Не е указан'),
+
+                TextColumn::make('proposer_name')
+                    ->label('Предложил')
+                    ->searchable()
+                    ->limit(25)
+                    ->placeholder('Неизвестен'),
+
+                BadgeColumn::make('amendment_type')
+                    ->label('Тип')
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'new' => 'Нов',
+                        'modification' => 'Изменение',
+                        'deletion' => 'Заличаване',
+                        default => 'N/A',
+                    })
+                    ->colors([
+                        'success' => 'new',
+                        'warning' => 'modification',
+                        'danger' => 'deletion',
+                    ]),
+
+                BadgeColumn::make('status')
+                    ->label('Статус')
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'proposed' => 'Предложено',
+                        'approved' => 'Одобрено',
+                        'rejected' => 'Отхвърлено',
+                        'pending' => 'В очакване',
+                        default => 'Неизвестно',
+                    })
+                    ->colors([
+                        'success' => 'approved',
+                        'danger' => 'rejected',
+                        'info' => 'proposed',
+                        'warning' => 'pending',
+                    ]),
+
+                TextColumn::make('ai_confidence')
+                    ->label('Увереност')
+                    ->formatStateUsing(fn ($state) => $state ? number_format($state * 100, 1) . '%' : 'N/A')
+                    ->sortable()
+                    ->color(fn ($state) => match (true) {
+                        $state >= 0.8 => 'success',
+                        $state >= 0.6 => 'warning',
+                        default => 'danger',
+                    }),
+
+                TextColumn::make('amendment_description')
+                    ->label('Описание')
+                    ->limit(40)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= 40) {
+                            return null;
+                        }
+                        return $state;
+                    })
+                    ->placeholder('Няма описание'),
+
+                TextColumn::make('created_at')
+                    ->label('Анализирано')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Статус')
+                    ->options([
+                        'proposed' => 'Предложено',
+                        'approved' => 'Одобрено',
+                        'rejected' => 'Отхвърлено',
+                        'pending' => 'В очакване',
+                    ]),
+
+                Tables\Filters\SelectFilter::make('amendment_type')
+                    ->label('Тип изменение')
+                    ->options([
+                        'new' => 'Нов текст',
+                        'modification' => 'Изменение',
+                        'deletion' => 'Заличаване',
+                    ]),
+            ])
+            ->headerActions([
+                CreateAction::make()
+                    ->label('Нов анализ'),
+            ])
+            ->actions([
+                ViewAction::make()
+                    ->label('Преглед')
+                    ->url(fn (BillAnalysis $record): string => 
+                        route('filament.backoffice.resources.bill-analyses.view', $record)
+                    ),
+                EditAction::make()
+                    ->label('Редактиране'),
+                DeleteAction::make()
+                    ->label('Изтриване'),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Изтриване на избраните'),
+                ]),
+            ])
+            ->defaultSort('created_at', 'desc');
+    }
+}

@@ -16,15 +16,12 @@ class ParliamentMembersTable
     {
         return $table
             ->columns([
-                TextColumn::make('member_id')
-                    ->label('ID')
-                    ->searchable()
-                    ->sortable(),
-                
                 TextColumn::make('full_name')
                     ->label('Пълно име')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold')
+                    ->size('base'),
                 
                 TextColumn::make('electoral_district')
                     ->label('Изборен район')
@@ -35,7 +32,9 @@ class ParliamentMembersTable
                     ->label('Политическа партия')
                     ->searchable()
                     ->sortable()
-                    ->wrap(),
+                    ->wrap()
+                    ->badge()
+                    ->color('primary'),
                 
                 TextColumn::make('profession')
                     ->label('Професия')
@@ -51,7 +50,15 @@ class ParliamentMembersTable
                 TextColumn::make('committees_count')
                     ->label('Комисии')
                     ->counts('committees')
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color('success'),
+                
+                TextColumn::make('member_id')
+                    ->label('ID')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('created_at')
                     ->label('Добавен')
@@ -78,10 +85,11 @@ class ParliamentMembersTable
                             ->toArray();
                     }),
             ])
-            ->recordActions([
+            ->actions([
                 ViewAction::make()
-                    ->label('Преглед')
-                    ->modalHeading('Детайли за народен представител'),
+                    ->label('Детайли')
+                    ->icon('heroicon-m-eye')
+                    ->url(fn ($record) => route('filament.backoffice.resources.parliament-members.view', $record)),
             ])
             ->toolbarActions([])
             ->defaultSort('full_name');

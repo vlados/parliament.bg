@@ -55,4 +55,12 @@ class Committee extends Model
     {
         return $this->hasMany(Bill::class, 'committee_id', 'committee_id');
     }
+
+    /**
+     * Get transcripts for this committee
+     */
+    public function transcripts(): HasMany
+    {
+        return $this->hasMany(Transcript::class, 'committee_id', 'committee_id');
+    }
 }

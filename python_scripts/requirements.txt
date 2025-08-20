@@ -1,0 +1,3 @@
+langextract
+google-generativeai
+python-dotenv
